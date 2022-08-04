@@ -1,0 +1,27 @@
+version: '3.6'
+
+services:
+  mysqldb:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_USER: homestead
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./db:/var/lib/mysql
+  app:
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    image: node-mysql-orm
+    depends_on:
+      - mysqldb
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
