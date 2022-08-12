@@ -53,6 +53,16 @@ class PessoaController
 		}
 	}
 
+	static async restauraUmaPessoas(req, res)
+	{
+		const {id} = req.params;
+		try {
+			const pessoaRestaurada = await database.Pessoas.restore({where:{id:Number(id)}});
+			res.status(200).json({message: `o ${id} foi restaurado`});
+		} catch (error) {
+			res.status(500).json(error.message);
+		}
+	}
 	static async deletaPessoa(req, res)
 	{
 		const {id} = req.params;
