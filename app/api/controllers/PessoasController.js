@@ -5,8 +5,18 @@ class PessoaController
 	static async pegaTodasAsPessoas(req, res)
 	{
 		try{
-			let todasPessoas = await database.Pessoas.findAll();
+			let todasPessoas = await database.Pessoas.scope("todos").findAll();
 			return res.status(200).json(todasPessoas);
+		} catch (error){
+			res.status(500).json(error.message);
+		}
+	}
+
+	static async pegaTodasAsPessoasAtivas(req, res)
+	{
+		try{
+			let pessoasAtivas = await database.Pessoas.findAll();
+			return res.status(200).json(pessoasAtivas);
 		} catch (error){
 			res.status(500).json(error.message);
 		}
@@ -138,6 +148,30 @@ class PessoaController
 			res.status(200).json({message:"Pronto"})
 		} catch (error) {
 			res.status(500).json(error.message);
+		}
+	}
+
+	static async pegaMatriculas(req, res)
+	{
+		const {id} = req.params;
+		try {
+			const pessoa = await database.Pessoas.findOne({where:{id:Number(id)}});
+			const matriculas = await pessoa.getAulasMatriculadas();
+			res.status(200).json(matriculas);
+		} catch (error) {
+			res.status(500).json(error.message);
+		}
+	}
+
+	static async pegaMatriculasPorTurma(req, res)
+	{
+		const {turmaId} = req.params;
+		try {
+			const matriculas = await database.Matriculas.findAndCountAll({where:{turma_id:Number(turmaId), status:"confirmado"}});
+			res.status(200).json(matriculas)
+		} catch (error) {
+			res.status(500).json(error.message);
+
 		}
 	}
 }

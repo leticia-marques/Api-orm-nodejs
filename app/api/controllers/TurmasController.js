@@ -1,11 +1,19 @@
 const dataBase = require('../models');
+const sequelize = require('sequelize');
+const op = sequelize.Op;
+
 
 class TurmasController
 {
 	static async pegaTodasAsTurmas(req, res)
 	{
+		const {data_inicial, data_final} = req.query;
+		const where = {};
+		data_inicial || data_final ? where.data_inicio = {}: null;
+		data_inicial ? where.data_inicio[op.gte] = data_inicial : null;
+		data_final ? where.data_inicio[op.lte] = data_final : null;
 		try{
-			const turmas = await dataBase.Turmas.findAll();
+			const turmas = await dataBase.Turmas.findAll({where});
 			res.status(200).json(turmas);
 		} catch (error){
 			res.status(500).json(error.message);
