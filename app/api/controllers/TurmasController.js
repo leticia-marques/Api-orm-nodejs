@@ -1,6 +1,5 @@
-const dataBase = require('../models');
-const sequelize = require('sequelize');
-const op = sequelize.Op;
+const Services = require('../services/TurmasServices');
+const service = new Services();
 
 
 class TurmasController
@@ -8,12 +7,9 @@ class TurmasController
 	static async pegaTodasAsTurmas(req, res)
 	{
 		const {data_inicial, data_final} = req.query;
-		const where = {};
-		data_inicial || data_final ? where.data_inicio = {}: null;
-		data_inicial ? where.data_inicio[op.gte] = data_inicial : null;
-		data_final ? where.data_inicio[op.lte] = data_final : null;
+
 		try{
-			const turmas = await dataBase.Turmas.findAll({where});
+			const turmas = await service.pegaTurmas(data_inicial, data_final);
 			res.status(200).json(turmas);
 		} catch (error){
 			res.status(500).json(error.message);
@@ -24,8 +20,9 @@ class TurmasController
 	{
 		const dados = req.body;
 		try {
-			let novoTurma = await dataBase.Turmas.create(dados);
-			res.status(200).json(novoTurma);
+			// let novoTurma = await dataBase.Turmas.create(dados);
+			let novaTurma = await service.adicionaNovoRegistro(dados);
+			res.status(200).json(novaTurma);
 		} catch (error) {
 			res.status(500).json(error.message);
 		}
@@ -35,7 +32,7 @@ class TurmasController
 	{
 		const {id} = req.params;
 		try{
-			const umaTurma = await dataBase.Turmas.findOne({where:{id:Number(id)}});
+			let umaTurma = await service.pegaUmRegistro(id);
 			return res.status(200).json(umaTurma);
 		} catch (error){
 			res.status(500).json(error.message);
@@ -47,8 +44,7 @@ class TurmasController
 		const {id} = req.params;
 		const novosDados = req.body;
 		try{
-			await dataBase.Turmas.update(novosDados, {where:{id:Number(id)}});
-			let turmaAtualizada = await dataBase.Turmas.findOne({where:{id:Number(id)}});
+			let turmaAtualizada = await service.atualizaDadosTurma(id, novosDados);
 			res.status(200).json(turmaAtualizada);
 		} catch (error){
 			res.status(500).json(error.message);
@@ -59,7 +55,7 @@ class TurmasController
 	{
 		const {id} = req.params;
 		try {
-			await dataBase.Turmas.destroy({where:{id:Number(id)}});
+			await service.deletaRegistro(id);
 			res.status(200).json({message:"Pronto"});
 		} catch (error) {
 			res.status(500).json(error.message);
